@@ -1,10 +1,10 @@
 /**
  * Google Apps Script - Media Upload Handler for Google Drive
- * Target Folder: https://drive.google.com/drive/folders/1pS3g7wmOS0ZjxPx61zy3lOjLNDG2AACz
+ * Target Folder: https://drive.google.com/drive/folders/14PdF8W3hTww5C1u5gMsl7Z62RHhD8qQt (RUBY_RAMLEELA)
  */
 
-// Your target Google Drive folder ID
-const TARGET_FOLDER_ID = "1pS3g7wmOS0ZjxPx61zy3lOjLNDG2AACz";
+// Your target Google Drive folder ID (Ruby Ramleela)
+const TARGET_FOLDER_ID = "14PdF8W3hTww5C1u5gMsl7Z62RHhD8qQt";
 
 /**
  * Handles HTTP GET requests - used for ping/health check

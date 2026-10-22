@@ -2,9 +2,10 @@
  * Client Configuration for Google Drive Upload Web App
  */
 const CONFIG = {
-  // Target Google Drive Folder details
-  FOLDER_ID: "1pS3g7wmOS0ZjxPx61zy3lOjLNDG2AACz",
-  FOLDER_URL: "https://drive.google.com/drive/folders/1pS3g7wmOS0ZjxPx61zy3lOjLNDG2AACz?usp=sharing",
+  // Target Google Drive Folder details (Ruby Ramleela)
+  FOLDER_ID: "14PdF8W3hTww5C1u5gMsl7Z62RHhD8qQt",
+  FOLDER_URL: "https://drive.google.com/drive/folders/14PdF8W3hTww5C1u5gMsl7Z62RHhD8qQt?usp=sharing",
+  EVENT_NAME: "Ruby Ramleela",
 
   // Google Apps Script Web App Deployment URL
   // You can set it here or configure it in the web app settings modal (saved to localStorage)

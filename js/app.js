@@ -277,6 +277,12 @@
   async function startUpload() {
     if (state.queue.length === 0 || state.isUploading) return;
 
+    if (!CONFIG.APPS_SCRIPT_URL || CONFIG.APPS_SCRIPT_URL.trim() === "") {
+      showToast("Cannot upload: Google Apps Script URL not configured in config.js.", "error");
+      alert("To upload directly to your Google Drive folder (1pS3g7wmOS0ZjxPx61zy3lOjLNDG2AACz), paste your deployed Web App URL into 'js/config.js'.");
+      return;
+    }
+
     state.isUploading = true;
     renderViewState();
 
@@ -288,33 +294,28 @@
       DOM.progressStatusText.textContent = `Uploading ${i + 1} of ${totalFiles}...`;
 
       try {
-        if (CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.trim().length > 0) {
-          await uploadToGoogleDrive(item, (p) => {
-            const overall = Math.round(((i + p) / totalFiles) * 100);
-            updateProgress(overall);
-          });
-        } else {
-          // Automatic seamless simulation if script URL hasn't been pasted yet
-          await simulatePhoneUpload((p) => {
-            const overall = Math.round(((i + p) / totalFiles) * 100);
-            updateProgress(overall);
-          });
-        }
+        await uploadToGoogleDrive(item, (p) => {
+          const overall = Math.round(((i + p) / totalFiles) * 100);
+          updateProgress(overall);
+        });
         item.status = 'completed';
         completed++;
       } catch (err) {
         console.error('Upload error for', item.name, err);
-        showToast(`Could not upload ${item.name}.`, 'error');
+        showToast(`Could not upload ${item.name}: ${err.message}`, 'error');
       }
     }
 
     state.isUploading = false;
     updateProgress(100);
 
-    // Show Success View
-    setTimeout(() => {
-      showSuccessView(completed);
-    }, 400);
+    if (completed > 0) {
+      setTimeout(() => {
+        showSuccessView(completed);
+      }, 400);
+    } else {
+      renderViewState();
+    }
   }
 
   /**
@@ -360,24 +361,7 @@
     onProgress(1.0);
   }
 
-  /**
-   * Smooth simulated upload for testing
-   */
-  function simulatePhoneUpload(onProgress) {
-    return new Promise(resolve => {
-      let p = 0;
-      const timer = setInterval(() => {
-        p += 0.25;
-        if (p >= 1.0) {
-          clearInterval(timer);
-          onProgress(1.0);
-          resolve();
-        } else {
-          onProgress(p);
-        }
-      }, 200);
-    });
-  }
+
 
   /**
    * Update Progress Bar UI
