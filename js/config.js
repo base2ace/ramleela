@@ -9,7 +9,7 @@ const CONFIG = {
 
   // Google Apps Script Web App Deployment URL
   // You can set it here or configure it in the web app settings modal (saved to localStorage)
-  APPS_SCRIPT_URL: "",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxvjlI_7UMlgKrZ-_in_MetPzPi8GZGM02C1NdCnWySyBoySSVZAKMupuijACqjs7C5zA/exec",
 
   // Maximum recommended file size for Apps Script uploads (in Megabytes)
   // Apps Script has a payload limit (~50MB), so 45MB is a safe cap.
@@ -17,11 +17,11 @@ const CONFIG = {
 
   // Allowed file extensions and MIME patterns
   ALLOWED_IMAGE_TYPES: [
-    "image/jpeg", "image/png", "image/gif", "image/webp", 
+    "image/jpeg", "image/png", "image/gif", "image/webp",
     "image/svg+xml", "image/bmp", "image/heic", "image/heif"
   ],
   ALLOWED_VIDEO_TYPES: [
-    "video/mp4", "video/webm", "video/quicktime", 
+    "video/mp4", "video/webm", "video/quicktime",
     "video/x-msvideo", "video/x-matroska", "video/ogg"
   ],
 
