@@ -99,6 +99,8 @@
 
     let addedCount = 0;
     let rejectedCount = 0;
+    let oversizedCount = 0;
+    const maxSizeBytes = CONFIG.MAX_FILE_SIZE_MB * 1024 * 1024;
 
     Array.from(files).forEach(file => {
       const isImage = file.type.startsWith('image/') || hasExtension(file.name, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp']);
@@ -106,6 +108,11 @@
 
       if (!isImage && !isVideo) {
         rejectedCount++;
+        return;
+      }
+
+      if (file.size > maxSizeBytes) {
+        oversizedCount++;
         return;
       }
 
@@ -144,6 +151,10 @@
 
     if (rejectedCount > 0) {
       showToast('Please select only photos and videos.', 'warning');
+    }
+
+    if (oversizedCount > 0) {
+      showToast(`Files over ${CONFIG.MAX_FILE_SIZE_MB}MB cannot be uploaded.`, 'warning');
     }
   }
 
@@ -319,20 +330,26 @@
   }
 
   /**
-   * Send file to Google Apps Script Web App
+   * Send file to Google Drive (direct for <=25MB, chunked resumable for >25MB up to 100MB)
    */
   async function uploadToGoogleDrive(item, onProgress) {
+    const CHUNKED_THRESHOLD = 25 * 1024 * 1024; // 25 MB
+
+    if (item.file.size > CHUNKED_THRESHOLD) {
+      await uploadLargeFileInChunks(item, onProgress);
+    } else {
+      await uploadSmallFileDirect(item, onProgress);
+    }
+  }
+
+  /**
+   * Direct single-request upload for files under 25MB
+   */
+  async function uploadSmallFileDirect(item, onProgress) {
     onProgress(0.2);
 
-    // Read as Base64
-    const base64Data = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = () => reject(new Error('File read failed'));
-      reader.readAsDataURL(item.file);
-    });
-
-    onProgress(0.6);
+    const base64Data = await readBlobAsBase64(item.file);
+    onProgress(0.5);
 
     const payload = {
       filename: item.name,
@@ -340,7 +357,6 @@
       fileData: base64Data
     };
 
-    // Use text/plain to bypass CORS preflight
     const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST',
       headers: {
@@ -355,10 +371,117 @@
 
     const data = await response.json();
     if (data.status !== 'success') {
-      throw new Error(data.message || 'Apps script reported an error.');
+      throw new Error(data.message || 'Server reported an error.');
     }
 
     onProgress(1.0);
+  }
+
+  /**
+   * Chunked resumable upload for files > 25MB up to 100MB
+   */
+  async function uploadLargeFileInChunks(item, onProgress) {
+    onProgress(0.05);
+
+    // 1. Initialize Resumable Upload Session
+    const initPayload = {
+      action: 'init_resumable',
+      filename: item.name,
+      mimeType: item.type || (item.isImage ? 'image/jpeg' : 'video/mp4')
+    };
+
+    const initResp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(initPayload)
+    });
+
+    if (!initResp.ok) {
+      throw new Error(`Could not initiate upload session (${initResp.status})`);
+    }
+
+    const initData = await initResp.json();
+    if (initData.status !== 'session_ready' || !initData.sessionUrl) {
+      throw new Error(initData.message || 'Google Drive session URL not received.');
+    }
+
+    const sessionUrl = initData.sessionUrl;
+    const totalSize = item.file.size;
+    // 8 MB chunk size (exact multiple of 256 KiB)
+    const CHUNK_SIZE = 8 * 1024 * 1024;
+    let startByte = 0;
+
+    // 2. Upload chunks sequentially
+    while (startByte < totalSize) {
+      const endByte = Math.min(startByte + CHUNK_SIZE, totalSize);
+      const chunkBlob = item.file.slice(startByte, endByte);
+      const chunkBase64 = await readBlobAsBase64(chunkBlob);
+
+      const chunkPayload = {
+        action: 'upload_chunk',
+        sessionUrl: sessionUrl,
+        range: `bytes ${startByte}-${endByte - 1}/${totalSize}`,
+        chunkData: chunkBase64
+      };
+
+      let retries = 3;
+      let chunkSuccess = false;
+      let lastError = null;
+
+      while (retries > 0 && !chunkSuccess) {
+        try {
+          const chunkResp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify(chunkPayload)
+          });
+
+          if (!chunkResp.ok) {
+            throw new Error(`Chunk transfer failed (${chunkResp.status})`);
+          }
+
+          const chunkResult = await chunkResp.json();
+
+          if (chunkResult.status === 'chunk_received' || chunkResult.status === 'success') {
+            chunkSuccess = true;
+          } else {
+            throw new Error(chunkResult.message || 'Chunk transfer error');
+          }
+        } catch (e) {
+          lastError = e;
+          retries--;
+          if (retries > 0) {
+            await new Promise(r => setTimeout(r, 1200));
+          }
+        }
+      }
+
+      if (!chunkSuccess) {
+        throw new Error(lastError ? lastError.message : 'Chunk transfer failed after multiple attempts.');
+      }
+
+      startByte = endByte;
+      const progressFraction = Math.min(0.98, startByte / totalSize);
+      onProgress(progressFraction);
+    }
+
+    onProgress(1.0);
+  }
+
+  /**
+   * Helper to convert Blob or slice to Base64
+   */
+  function readBlobAsBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(new Error('File slice read failed'));
+      reader.readAsDataURL(blob);
+    });
   }
 
 

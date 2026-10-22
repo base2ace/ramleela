@@ -11,9 +11,9 @@ const CONFIG = {
   // You can set it here or configure it in the web app settings modal (saved to localStorage)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxvjlI_7UMlgKrZ-_in_MetPzPi8GZGM02C1NdCnWySyBoySSVZAKMupuijACqjs7C5zA/exec",
 
-  // Maximum recommended file size for Apps Script uploads (in Megabytes)
-  // Apps Script has a payload limit (~50MB), so 45MB is a safe cap.
-  MAX_FILE_SIZE_MB: 45,
+  // Maximum file size (100 MB)
+  // Files > 25MB are uploaded using chunked resumable upload
+  MAX_FILE_SIZE_MB: 100,
 
   // Allowed file extensions and MIME patterns
   ALLOWED_IMAGE_TYPES: [
