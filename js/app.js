@@ -330,7 +330,7 @@
   }
 
   /**
-   * Send file to Google Drive (direct for <=25MB, chunked resumable for >25MB up to 100MB)
+   * Send file to Google Drive (direct for <=25MB, chunked resumable for >25MB up to 250MB)
    */
   async function uploadToGoogleDrive(item, onProgress) {
     const CHUNKED_THRESHOLD = 25 * 1024 * 1024; // 25 MB
@@ -378,7 +378,7 @@
   }
 
   /**
-   * Chunked resumable upload for files > 25MB up to 100MB
+   * Chunked resumable upload for files > 25MB up to 250MB
    */
   async function uploadLargeFileInChunks(item, onProgress) {
     onProgress(0.05);

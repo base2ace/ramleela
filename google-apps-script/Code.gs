@@ -1,7 +1,7 @@
 /**
  * Google Apps Script - Media Upload Handler for Google Drive
  * Target Folder: https://drive.google.com/drive/folders/14PdF8W3hTww5C1u5gMsl7Z62RHhD8qQt (RUBY_RAMLEELA)
- * Supports files up to 100MB via chunked resumable uploads
+ * Supports files up to 250MB via chunked resumable uploads
  */
 
 // Your target Google Drive folder ID (Ruby Ramleela)
