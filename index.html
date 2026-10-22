@@ -2,413 +2,162 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DriveDrop — Simple & Elegant Media Uploader</title>
-  <meta name="description" content="Fast, elegant, and secure image and video uploader directly to Google Drive. Hosted on GitHub Pages.">
-  <meta name="keywords" content="google drive, file uploader, media upload, images, videos, github pages">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Upload to Google Drive</title>
+  <meta name="description" content="Simple mobile photo and video uploader directly to Google Drive.">
+  
+  <!-- Mobile Web App Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#090d16">
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z'/></svg>">
   
-  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet -->
+  <!-- Mobile Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Ambient background glow elements -->
-  <div class="bg-glow bg-glow-1"></div>
-  <div class="bg-glow bg-glow-2"></div>
-  <div class="bg-glow bg-glow-3"></div>
+  <!-- Ambient background lighting -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-bottom"></div>
 
-  <!-- Fullscreen drag overlay -->
-  <div id="dragOverlay" class="drag-overlay hidden">
-    <div class="drag-overlay-content">
-      <svg class="drag-icon-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <h3>Drop your media files here</h3>
-      <p>Release to add them to your upload queue</p>
-    </div>
-  </div>
-
-  <!-- App Header -->
-  <header class="app-header">
-    <div class="header-container">
-      <div class="logo-group">
-        <div class="logo-icon-wrapper">
-          <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor">
+  <!-- Mobile App Container -->
+  <div class="mobile-app-container">
+    
+    <!-- Top Mobile Bar -->
+    <header class="mobile-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
           </svg>
         </div>
-        <div class="logo-text">
-          <span class="logo-title">DriveDrop</span>
-          <span class="logo-badge">Media Portal</span>
+        <span class="brand-name">Drive Drop</span>
+      </div>
+      <div class="target-indicator">
+        <span class="cloud-pulse"></span>
+        <span>Google Drive</span>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="mobile-main">
+      
+      <!-- Hidden file input for native mobile picker (Gallery, Camera, Files) -->
+      <input type="file" id="mobileFileInput" multiple accept="image/*,video/*" class="sr-only">
+
+      <!-- View 1: Empty / Idle State -->
+      <section id="emptyState" class="view-panel">
+        <div class="hero-text">
+          <h1>Upload Photos & Videos</h1>
+          <p>Select media from your phone to upload directly to Google Drive.</p>
         </div>
-      </div>
 
-      <div class="header-actions">
-        <!-- Target folder quick link -->
-        <a id="targetFolderBtn" href="#" target="_blank" rel="noopener noreferrer" class="pill-btn folder-btn" title="View destination Google Drive Folder">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19 4H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-7L10 4H5a2 2 0 00-2 2v12h16V6h-7l-2-2h-3"/>
-          </svg>
-          <span class="folder-label">Target Folder</span>
-          <svg class="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-          </svg>
-        </a>
-
-        <!-- Connection status indicator -->
-        <button id="statusPill" class="pill-btn status-pill" title="Click to view backend connection details">
-          <span class="status-dot"></span>
-          <span id="statusText" class="status-text">Checking...</span>
-        </button>
-
-        <!-- Setup Guide button -->
-        <button id="openGuideBtn" class="icon-btn" title="Setup Guide & Instructions">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-        </button>
-
-        <!-- Settings button -->
-        <button id="openSettingsBtn" class="icon-btn" title="Settings & Backend Config">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content Container -->
-  <main class="main-wrapper">
-    
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-badge">
-        <span class="pulse-sparkle">✨</span>
-        <span>Direct-to-Drive Media Drop</span>
-      </div>
-      <h1 class="hero-title">Upload Images & Videos to Google Drive</h1>
-      <p class="hero-subtitle">
-        Drop your media files below to automatically save them directly into your designated Google Drive folder.
-      </p>
-    </section>
-
-    <!-- Upload Zone Container -->
-    <section class="upload-section">
-      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload files area">
-        <input type="file" id="fileInput" class="hidden-input" multiple accept="image/*,video/*">
-        
-        <div class="drop-zone-content">
-          <div class="upload-icon-container">
-            <svg class="upload-cloud-icon" viewBox="0 0 64 64" fill="none">
-              <circle cx="32" cy="32" r="30" class="icon-bg-circle" />
-              <path d="M44.5 35.8c-1-6.1-6.5-10.8-13-10.8-5.3 0-9.9 3.2-12 7.8-5 0.5-8.9 4.7-8.9 9.8 0 5.4 4.4 9.8 9.8 9.8h23.5c4.8 0 8.7-3.9 8.7-8.7 0-4.5-3.4-8.2-7.8-8.7" stroke="url(#cloudGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M32 30v16M25 37l7-7 7 7" stroke="url(#cloudGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="cloudGrad" x1="16" y1="24" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#818cf8"/>
-                  <stop offset="1" stop-color="#c084fc"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="pulse-ring"></div>
-          </div>
-
-          <h2 class="drop-headline">Choose files or drag & drop here</h2>
-          <p class="drop-subtext">High quality photos, videos, and screen recordings</p>
-
-          <div class="drop-cta-group">
-            <button type="button" id="browseBtn" class="btn btn-primary browse-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Browse Media Files
-            </button>
-            <span class="or-separator">or drop them anywhere</span>
-          </div>
-
-          <div class="supported-formats">
-            <div class="format-tag">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-              <span>JPG, PNG, GIF, WEBP, HEIC</span>
-            </div>
-            <div class="format-tag">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="23 7 16 12 23 17 23 7"/>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-              </svg>
-              <span>MP4, WEBM, MOV, MKV</span>
-            </div>
-            <div class="format-tag limit-tag">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              <span>Max recommended: ~45 MB/file</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Upload Queue Section (Hidden when empty) -->
-    <section id="queueSection" class="queue-section hidden">
-      <div class="queue-header">
-        <div class="queue-stats">
-          <h3 class="queue-title">Upload Queue</h3>
-          <span id="queueSummary" class="queue-summary-badge">0 files</span>
-        </div>
-        
-        <div class="queue-actions">
-          <button id="addMoreBtn" class="btn btn-secondary btn-sm" title="Add more images or videos">
+        <button type="button" id="selectMediaBtn" class="touch-card select-card" aria-label="Select photos and videos">
+          <div class="card-icon-circle">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
             </svg>
-            Add More
-          </button>
-          
-          <button id="clearCompletedBtn" class="btn btn-secondary btn-sm" title="Remove completed items from list">
+            <div class="plus-badge">+</div>
+          </div>
+          <span class="card-title">Tap to Select Files</span>
+          <span class="card-subtitle">Choose from Photo Library or Camera</span>
+        </button>
+
+        <div class="info-pills">
+          <div class="pill">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            Photos (All formats)
+          </div>
+          <div class="pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+            Videos (MP4, MOV, etc.)
+          </div>
+        </div>
+      </section>
+
+      <!-- View 2: Queue & Selection State -->
+      <section id="queueState" class="view-panel hidden">
+        <div class="queue-top-bar">
+          <div>
+            <h2 id="queueCountText" class="panel-heading">3 Files Selected</h2>
+            <span id="queueTotalSizeText" class="panel-subheading">14.2 MB total</span>
+          </div>
+          <button type="button" id="clearQueueBtn" class="text-action-btn">Clear All</button>
+        </div>
+
+        <!-- Mobile Media Grid -->
+        <div id="mediaGrid" class="media-grid">
+          <!-- Dynamically populated cards -->
+        </div>
+
+        <!-- Add More Floating/Inline Button -->
+        <button type="button" id="addMoreMediaBtn" class="add-more-row">
+          <div class="add-more-icon">+</div>
+          <span>Add More Photos or Videos</span>
+        </button>
+      </section>
+
+      <!-- View 3: Success State -->
+      <section id="successState" class="view-panel hidden">
+        <div class="success-card">
+          <div class="success-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            Clear Done
-          </button>
-
-          <button id="clearAllBtn" class="btn btn-ghost btn-sm" title="Clear all files">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-            </svg>
-            Clear All
-          </button>
-
-          <button id="uploadAllBtn" class="btn btn-primary btn-sm">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Upload All
-          </button>
-        </div>
-      </div>
-
-      <!-- Batch Overall Progress -->
-      <div id="batchProgressBarWrapper" class="batch-progress-wrapper hidden">
-        <div class="batch-progress-info">
-          <span id="batchProgressText">Uploading batch: 0%</span>
-          <span id="batchProgressSpeed">-- KB/s</span>
-        </div>
-        <div class="progress-bar-track">
-          <div id="batchProgressBar" class="progress-bar-fill" style="width: 0%"></div>
-        </div>
-      </div>
-
-      <!-- File Cards Grid -->
-      <div id="fileListGrid" class="file-cards-grid">
-        <!-- Dynamically populated by app.js -->
-      </div>
-    </section>
-
-    <!-- Completed Uploads History Gallery (Hidden until files succeed) -->
-    <section id="historySection" class="history-section hidden">
-      <div class="history-header">
-        <div class="history-title-group">
-          <span class="history-icon">🎉</span>
-          <div>
-            <h3>Successfully Uploaded to Google Drive</h3>
-            <p>Your media has been stored in your Google Drive folder.</p>
           </div>
+          <h2>Upload Complete!</h2>
+          <p id="successMessage">Your photos and videos have been successfully saved to Google Drive.</p>
+          <button type="button" id="uploadMoreBtn" class="btn-primary full-width">
+            Upload More Files
+          </button>
         </div>
-        <a id="viewFolderBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19 4H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-7L10 4H5a2 2 0 00-2 2v12h16V6h-7l-2-2h-3"/>
-          </svg>
-          Open Drive Folder
-        </a>
-      </div>
-      <div id="historyGrid" class="history-grid">
-        <!-- Dynamically populated -->
-      </div>
-    </section>
+      </section>
 
-  </main>
+    </main>
 
-  <!-- Footer -->
-  <footer class="app-footer">
-    <div class="footer-container">
-      <div class="footer-left">
-        <p>DriveDrop &bull; Serverless Google Drive Media Uploader for GitHub Pages</p>
-      </div>
-      <div class="footer-right">
-        <span class="secure-badge">
+    <!-- Sticky Bottom Action Bar (Mobile Thumb Zone) -->
+    <div id="stickyBottomBar" class="sticky-bottom-bar hidden">
+      <div class="bottom-bar-inner">
+        <!-- Default State: Upload Button -->
+        <button type="button" id="startUploadBtn" class="btn-primary full-width upload-trigger">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Direct HTTPS End-to-End
-        </span>
+          <span id="uploadBtnText">Upload 3 Files</span>
+        </button>
+
+        <!-- Active Upload Progress State -->
+        <div id="uploadProgressContainer" class="upload-progress-container hidden">
+          <div class="progress-labels">
+            <span id="progressStatusText">Uploading 1 of 3...</span>
+            <span id="progressPercentageText">35%</span>
+          </div>
+          <div class="progress-track">
+            <div id="progressFill" class="progress-fill" style="width: 35%"></div>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
 
-  <!-- Setup Guide Modal -->
-  <div id="guideModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-title-icon">🚀</span>
-          <div>
-            <h3 id="guideTitle">2-Minute Setup for Google Apps Script</h3>
-            <p>Connect your Google Drive folder to this GitHub Pages site in 3 simple steps</p>
-          </div>
-        </div>
-        <button id="closeGuideBtn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="step-card">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <h4>Open Google Apps Script</h4>
-            <p>Go to <a href="https://script.new" target="_blank" rel="noopener noreferrer" class="text-link">script.new</a> in your browser (make sure you are signed into the Google account that owns the Drive folder).</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <div class="step-code-header">
-              <h4>Paste the Backend Code</h4>
-              <button id="copyScriptBtn" class="btn btn-secondary btn-xs">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Copy Code
-              </button>
-            </div>
-            <p>Replace whatever is in <code>Code.gs</code> with this snippet (it already contains your folder ID):</p>
-            <pre class="code-preview"><code id="codeSnippetText"></code></pre>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <h4>Deploy as a Web App</h4>
-            <ol class="setup-instructions-list">
-              <li>Click the blue <strong>Deploy</strong> button (top right) &rarr; <strong>New deployment</strong>.</li>
-              <li>Click the gear icon next to "Select type" &rarr; select <strong>Web app</strong>.</li>
-              <li>Set <strong>Execute as:</strong> <code>Me</code> (your email).</li>
-              <li>Set <strong>Who has access:</strong> <code>Anyone</code> <span class="highlight-warn">(Important! Allows uploads from GitHub Pages without requiring visitor Google login)</span>.</li>
-              <li>Click <strong>Deploy</strong> and copy the generated <strong>Web App URL</strong> (it ends with <code>/exec</code>).</li>
-              <li>Paste that URL into this app's <strong>Settings</strong> modal!</li>
-            </ol>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button id="guideGotItBtn" class="btn btn-primary">Got it, Let's Configure</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-title-icon">⚙️</span>
-          <div>
-            <h3 id="settingsTitle">Backend Configuration</h3>
-            <p>Manage your Google Apps Script connection and upload mode</p>
-          </div>
-        </div>
-        <button id="closeSettingsBtn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="scriptUrlInput" class="form-label">
-            <span>Google Apps Script Web App URL</span>
-            <span class="label-hint">Must end with /exec</span>
-          </label>
-          <div class="input-with-action">
-            <input 
-              type="url" 
-              id="scriptUrlInput" 
-              class="text-input" 
-              placeholder="https://script.google.com/macros/s/.../exec"
-              spellcheck="false"
-              autocomplete="off"
-            >
-            <button id="testConnectionBtn" type="button" class="btn btn-secondary">
-              Test Connection
-            </button>
-          </div>
-          <div id="connectionStatusMsg" class="connection-status-msg hidden"></div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">
-            <span>Target Drive Folder ID</span>
-          </label>
-          <div class="code-pill">
-            <span id="displayFolderId">1pS3g7wmOS0ZjxPx61zy3lOjLNDG2AACz</span>
-            <a id="modalFolderLink" href="#" target="_blank" rel="noopener noreferrer" class="link-btn" title="Open Folder in Google Drive">
-              Open &rarr;
-            </a>
-          </div>
-        </div>
-
-        <div class="form-divider"></div>
-
-        <div class="form-group switch-group">
-          <div class="switch-info">
-            <label for="simModeToggle" class="switch-title">Demo / Simulation Mode</label>
-            <p class="switch-desc">Simulate realistic uploads locally without calling Google Apps Script (useful for previewing animations & styling).</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="simModeToggle">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button id="cancelSettingsBtn" class="btn btn-ghost">Cancel</button>
-        <button id="saveSettingsBtn" class="btn btn-primary">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Media Preview Lightbox Modal -->
-  <div id="previewModal" class="modal-backdrop hidden lightbox-backdrop" role="dialog" aria-modal="true">
-    <div class="lightbox-container">
-      <button id="closePreviewBtn" class="lightbox-close" aria-label="Close preview">&times;</button>
-      <div id="previewMediaContainer" class="lightbox-content">
-        <!-- Rendered image or video element -->
-      </div>
-      <div id="previewCaption" class="lightbox-caption"></div>
-    </div>
   </div>
 
   <!-- Toast Notification Container -->
-  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+  <div id="toastContainer" class="mobile-toast-container" aria-live="polite"></div>
 
   <!-- Scripts -->
   <script src="js/config.js"></script>
